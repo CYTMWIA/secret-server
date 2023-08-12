@@ -68,7 +68,9 @@ class Core:
     def has_permissions(self, api_key: str):
         if len(self.cfg.api_key) == 0:
             return True
-        return sha3_256(api_key) in self.cfg.api_key
+        if api_key:
+            return sha3_256(api_key) in self.cfg.api_key
+        return False
 
     def get_real_path(self, client_path):
         return os.path.join(self.root_dir, client_path)
