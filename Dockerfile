@@ -7,6 +7,6 @@ COPY scripts ./scripts
 COPY secret_server ./secret_server
 COPY requirements.txt ./
 
-RUN scripts/install.sh && pip cache purge
+RUN scripts/install.sh
 
 CMD scripts/run.sh
