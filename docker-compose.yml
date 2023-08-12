@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  secret_server:
+    image: secret_server
+    volumes:
+      - ./config:/app/config
+    ports:
+      - 16969:8000
+    restart: unless-stopped
