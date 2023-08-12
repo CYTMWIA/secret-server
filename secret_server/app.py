@@ -87,6 +87,8 @@ class Core:
         if "file_key" in query:
             data, iv = encrypt_data(data, path, query["file_key"])
             self.db[path] = iv
+
+        os.makedirs(os.path.dirname(real_path), exist_ok=True)
         with open(real_path, "wb") as f:
             f.write(data)
 
