@@ -1,6 +1,7 @@
 .vscode/
 tmp/
 root/
+data/
 *.sqlite
 
 # Byte-compiled / optimized / DLL files

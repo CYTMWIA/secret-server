@@ -1,4 +1,8 @@
 {
-    "api_key": [],
-    "sqlite_path": "secret.sqlite"
+    "Mode": "server",
+    "StorageBackend": "local",
+    "Addr": "127.0.0.1:8080",
+    "ApiKeyList": [
+        "test"
+    ]
 }
