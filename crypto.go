@@ -1,5 +1,10 @@
 package main
 
+import (
+	"crypto"
+	"encoding/hex"
+)
+
 func Decrypt(data []byte, key string) ([]byte, error) {
 	return data, nil
 }
@@ -9,5 +14,8 @@ func Encrypt(data []byte, key string) ([]byte, error) {
 }
 
 func Hash(s string) string {
-	return s
+	h := crypto.SHA3_256.New()
+	h.Write([]byte(s))
+	r := h.Sum(nil)
+	return hex.EncodeToString(r)
 }
