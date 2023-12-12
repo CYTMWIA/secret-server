@@ -42,7 +42,7 @@ func upload(ctx *gin.Context) {
 		return
 	}
 
-	secret, err := Encrypt(content, file_key)
+	secret, err := Encrypt(content, file_key, path)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -70,7 +70,7 @@ func download(ctx *gin.Context) {
 		return
 	}
 
-	content, err := Decrypt(plain, file_key)
+	content, err := Decrypt(plain, file_key, path)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
