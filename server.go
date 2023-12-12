@@ -48,7 +48,7 @@ func upload(ctx *gin.Context) {
 		return
 	}
 
-	err = DefaultStorageBackend.Write(path, secret)
+	err = DefaultStorageBackend.Write(Hash(path), secret)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -64,7 +64,7 @@ func download(ctx *gin.Context) {
 		return
 	}
 
-	plain, err := DefaultStorageBackend.Read(path)
+	plain, err := DefaultStorageBackend.Read(Hash(path))
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
