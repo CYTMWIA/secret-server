@@ -81,7 +81,7 @@ func download(ctx *gin.Context) {
 
 func Serve() error {
 	r := gin.Default()
-	r.PUT("/:path", upload)
-	r.GET("/:path", download)
+	r.PUT("/*path", upload)
+	r.GET("/*path", download)
 	return r.Run()
 }
