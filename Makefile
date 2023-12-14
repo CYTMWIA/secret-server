@@ -1,4 +1,4 @@
-GO_BUILD=CGO_ENABLED=0 go build
+GO_BUILD=CGO_ENABLED=0 go build -buildvcs
 
 all: test release-build
 
