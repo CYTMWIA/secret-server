@@ -16,7 +16,19 @@ type Config struct {
 	ApiKeyList     []string
 }
 
-func GetConfig() (*Config, error) {
+var CONFIG Config
+
+func Init() error {
+	cfg, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+	CONFIG = *cfg
+
+	return nil
+}
+
+func LoadConfig() (*Config, error) {
 	paths := []string{
 		"config.json",
 		"config/config.json",
@@ -44,13 +56,8 @@ func load_config(data []byte) (*Config, error) {
 }
 
 func IsVaildUser(api_key string) (bool, error) {
-	cfg, err := GetConfig()
-	if err != nil {
-		return false, err
-	}
-
 	hkey := crypto.Hash(api_key)
-	for _, key := range cfg.ApiKeyList {
+	for _, key := range CONFIG.ApiKeyList {
 		if key == hkey {
 			return true, nil
 		}

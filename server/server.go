@@ -88,5 +88,5 @@ func Serve() error {
 	r := gin.Default()
 	r.PUT("/*path", upload)
 	r.GET("/*path", download)
-	return r.Run()
+	return r.Run(config.CONFIG.Addr)
 }
