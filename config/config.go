@@ -16,16 +16,22 @@ type Config struct {
 	ApiKeyList     []string
 }
 
-var CONFIG Config
+var CONFIG Config = Config{
+	Mode:           "server",
+	StorageBackend: "local",
+	Addr:           "0.0.0.0:8080",
+	ApiKeyList:     []string{},
+}
 
-func Init() error {
+func Init(){
 	cfg, err := LoadConfig()
 	if err != nil {
-		return err
+		fmt.Println(err)
+	} else {
+		CONFIG = *cfg
 	}
-	CONFIG = *cfg
 
-	return nil
+	fmt.Printf("Using Config: %#v", CONFIG)
 }
 
 func LoadConfig() (*Config, error) {

@@ -21,10 +21,7 @@ func print_build_info() {
 func main() {
 	print_build_info()
 
-	err := config.Init()
-	if err != nil {
-		panic(err)
-	}
+	config.Init()
 
 	server.Serve()
 }
