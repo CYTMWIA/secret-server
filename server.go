@@ -80,6 +80,7 @@ func download(ctx *gin.Context) {
 }
 
 func Serve() error {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.PUT("/*path", upload)
 	r.GET("/*path", download)
