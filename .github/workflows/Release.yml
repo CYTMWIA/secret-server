@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build
+      run: make
+
+    - name: Upload Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/*
+        draft: true
