@@ -13,3 +13,6 @@ linux-amd64:
 
 linux-arm64:
 	GOOS=linux GOARCH=arm64 $(GO_BUILD) -o build/secret-server-$@
+
+clean:
+	rm -rf build
