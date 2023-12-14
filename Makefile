@@ -1,6 +1,7 @@
 GO_BUILD=CGO_ENABLED=0 go build -buildvcs
 
 all: test release-build
+	gzip build/*
 
 test:
 	go test crypto/
