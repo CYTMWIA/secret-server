@@ -1,10 +1,12 @@
-package main
+package config
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/CYTMWIA/secret-server/crypto"
 )
 
 type Config struct {
@@ -47,7 +49,7 @@ func IsVaildUser(api_key string) (bool, error) {
 		return false, err
 	}
 
-	hkey := Hash(api_key)
+	hkey := crypto.Hash(api_key)
 	for _, key := range cfg.ApiKeyList {
 		if key == hkey {
 			return true, nil

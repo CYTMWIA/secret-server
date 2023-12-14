@@ -1,8 +1,12 @@
-package main
+package server
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/CYTMWIA/secret-server/backend"
+	"github.com/CYTMWIA/secret-server/config"
+	"github.com/CYTMWIA/secret-server/crypto"
+	"github.com/gin-gonic/gin"
 )
 
 func parse_args(ctx *gin.Context, need_api_key bool) (path string, file_key string, api_key string, ok bool) {
@@ -26,7 +30,7 @@ func upload(ctx *gin.Context) {
 		return
 	}
 
-	vaild, err := IsVaildUser(api_key)
+	vaild, err := config.IsVaildUser(api_key)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -42,13 +46,13 @@ func upload(ctx *gin.Context) {
 		return
 	}
 
-	secret, err := Encrypt(content, file_key, path)
+	secret, err := crypto.Encrypt(content, file_key, path)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	err = DefaultStorageBackend.Write(Hash(path), secret)
+	err = backend.DefaultStorageBackend.Write(crypto.Hash(path), secret)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -64,13 +68,13 @@ func download(ctx *gin.Context) {
 		return
 	}
 
-	plain, err := DefaultStorageBackend.Read(Hash(path))
+	plain, err := backend.DefaultStorageBackend.Read(crypto.Hash(path))
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	content, err := Decrypt(plain, file_key, path)
+	content, err := crypto.Decrypt(plain, file_key, path)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return

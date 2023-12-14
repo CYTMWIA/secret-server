@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"runtime/debug"
+
+	"github.com/CYTMWIA/secret-server/server"
 )
 
 func print_build_info() {
@@ -18,5 +20,5 @@ func print_build_info() {
 func main() {
 	print_build_info()
 
-	Serve()
+	server.Serve()
 }
