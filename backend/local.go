@@ -14,5 +14,10 @@ func (b LocalBackend) Read(path_ string) ([]byte, error) {
 }
 
 func (b LocalBackend) Write(path_ string, data []byte) error {
-	return os.WriteFile(path.Join(b.root, path_), data, 0o0644)
+	path_ = path.Join(b.root, path_)
+	err := os.MkdirAll(path.Dir(path_), 0o0755)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path_, data, 0o0644)
 }
