@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
+	"strings"
 
 	"github.com/CYTMWIA/secret-server/backend"
 )
@@ -43,6 +45,18 @@ func (cfg *Config) Print() {
 }
 
 func LoadConfig() (*Config, error) {
+	var cfg Config
+	err := load_config_file(&cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	load_config_env(&cfg)
+
+	return &cfg, nil
+}
+
+func load_config_file(cfg *Config) error {
 	paths := []string{
 		"config.json",
 		"config/config.json",
@@ -52,19 +66,38 @@ func LoadConfig() (*Config, error) {
 		fmt.Printf("Loading %s ", path)
 		content, err := os.ReadFile(path)
 		if err == nil {
-			cfg, err := load_config(content)
+			err := json.Unmarshal(content, cfg)
 			if err == nil {
 				fmt.Println("OK")
-				return cfg, nil
+				return nil
 			}
 		}
 		fmt.Println("FAIL")
 	}
-	return nil, errors.New("unable to load config")
+	return errors.New("unable to load config")
 }
 
-func load_config(data []byte) (*Config, error) {
-	var config Config
-	err := json.Unmarshal(data, &config)
-	return &config, err
+func load_config_env(cfg *Config) {
+	load_config_env_into_object(reflect.ValueOf(cfg), "SECRET_SERVER")
+}
+
+func load_config_env_into_object(obj reflect.Value, env_name string) {
+	switch obj.Kind() {
+	case reflect.Struct:
+		for i := 0; i < obj.NumField(); i++ {
+			field_name := obj.Type().Field(i).Name
+			new_env_name := env_name + "_" + strings.ToUpper(field_name)
+			load_config_env_into_object(obj.Field(i), new_env_name)
+		}
+	case reflect.String:
+		env_value := os.Getenv(env_name)
+		if env_value != "" && obj.CanSet() {
+			fmt.Println("Read env:", env_name)
+			obj.SetString(env_value)
+		}
+	case reflect.Pointer:
+		load_config_env_into_object(obj.Elem(), env_name)
+	default:
+		return
+	}
 }
