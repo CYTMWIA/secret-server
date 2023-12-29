@@ -46,10 +46,8 @@ func (cfg *Config) Print() {
 
 func LoadConfig() (*Config, error) {
 	var cfg Config
-	err := load_config_file(&cfg)
-	if err != nil {
-		return nil, err
-	}
+
+	load_config_file(&cfg)
 
 	load_config_env(&cfg)
 
