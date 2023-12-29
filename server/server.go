@@ -1,6 +1,8 @@
 package server
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/CYTMWIA/secret-server/backend"
@@ -23,7 +25,9 @@ func parse_args(ctx *gin.Context, need_api_key bool) (path string, file_key stri
 }
 
 type WebApp struct {
-	mode    string
+	mode   string
+	server *http.Server
+
 	backend backend.StorageBackend
 
 	user_list []string
@@ -38,6 +42,16 @@ func (app *WebApp) is_vaild_user(api_key string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (app *WebApp) shutdown_when_function_mode(_ *gin.Context) {
+	if app.mode == "function" {
+		go func() {
+			if err := app.server.Shutdown(context.Background()); err != nil {
+				fmt.Println(err)
+			}
+		}()
+	}
 }
 
 func (app *WebApp) upload(ctx *gin.Context) {
@@ -104,8 +118,18 @@ func Serve(addr string, mode string, backend backend.StorageBackend, user_list [
 	app := WebApp{mode: mode, backend: backend, user_list: user_list}
 
 	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
-	r.PUT("/*path", app.upload)
-	r.GET("/*path", app.download)
-	return r.Run(addr)
+	router := gin.Default()
+	router.PUT("/*path", app.upload, app.shutdown_when_function_mode)
+	router.GET("/*path", app.download, app.shutdown_when_function_mode)
+
+	app.server = &http.Server{
+		Addr:    addr,
+		Handler: router,
+	}
+
+	err := app.server.ListenAndServe()
+	if err != nil && err == http.ErrServerClosed {
+		return nil
+	}
+	return err
 }
