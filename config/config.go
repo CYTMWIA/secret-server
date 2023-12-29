@@ -21,8 +21,25 @@ type Config struct {
 	ApiKeyList []string
 }
 
+func secret_text(origin string, display_length int) string {
+	if display_length > len(origin) {
+		return origin
+	} else {
+		return origin[:display_length] + "******"
+	}
+}
+
 func (cfg *Config) Print() {
-	fmt.Printf("%#v\n", *cfg)
+	var be_printed = *cfg
+	be_printed.BackendS3.Id = secret_text(be_printed.BackendS3.Id, 4)
+	be_printed.BackendS3.Secret = secret_text(be_printed.BackendS3.Secret, 4)
+
+	bytes, err := json.MarshalIndent(be_printed, "", "  ")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(string(bytes))
+	}
 }
 
 func LoadConfig() (*Config, error) {
