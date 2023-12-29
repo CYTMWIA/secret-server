@@ -5,4 +5,4 @@ type StorageBackend interface {
 	Write(path string, data []byte) error
 }
 
-var DefaultStorageBackend StorageBackend = LocalBackend{root: "data"}
+var DefaultStorageBackend StorageBackend = &LocalBackend{config: LocalBackendConfig{Root: "data"}}
