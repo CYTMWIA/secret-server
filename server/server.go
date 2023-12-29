@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/CYTMWIA/secret-server/backend"
-	"github.com/CYTMWIA/secret-server/config"
 	"github.com/CYTMWIA/secret-server/crypto"
 	"github.com/gin-gonic/gin"
 )
@@ -23,14 +22,32 @@ func parse_args(ctx *gin.Context, need_api_key bool) (path string, file_key stri
 	return
 }
 
-func upload(ctx *gin.Context) {
+type WebApp struct {
+	mode    string
+	backend backend.StorageBackend
+
+	user_list []string
+}
+
+func (app *WebApp) is_vaild_user(api_key string) (bool, error) {
+	hkey := crypto.Hash(api_key)
+	for _, key := range app.user_list {
+		if key == hkey {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (app *WebApp) upload(ctx *gin.Context) {
 	path, file_key, api_key, ok := parse_args(ctx, true)
 	if !ok {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	vaild, err := config.IsVaildUser(api_key)
+	vaild, err := app.is_vaild_user(api_key)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -52,7 +69,7 @@ func upload(ctx *gin.Context) {
 		return
 	}
 
-	err = backend.DefaultStorageBackend.Write(crypto.Hash(path), secret)
+	err = app.backend.Write(crypto.Hash(path), secret)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -61,14 +78,14 @@ func upload(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func download(ctx *gin.Context) {
+func (app *WebApp) download(ctx *gin.Context) {
 	path, file_key, _, ok := parse_args(ctx, false)
 	if !ok {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	plain, err := backend.DefaultStorageBackend.Read(crypto.Hash(path))
+	plain, err := app.backend.Read(crypto.Hash(path))
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -83,10 +100,12 @@ func download(ctx *gin.Context) {
 	ctx.Data(http.StatusOK, "text/plain", content)
 }
 
-func Serve() error {
+func Serve(addr string, mode string, backend backend.StorageBackend, user_list []string) error {
+	app := WebApp{mode: mode, backend: backend, user_list: user_list}
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.PUT("/*path", upload)
-	r.GET("/*path", download)
-	return r.Run(config.CONFIG.Addr)
+	r.PUT("/*path", app.upload)
+	r.GET("/*path", app.download)
+	return r.Run(addr)
 }

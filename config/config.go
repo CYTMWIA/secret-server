@@ -6,32 +6,23 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/CYTMWIA/secret-server/crypto"
+	"github.com/CYTMWIA/secret-server/backend"
 )
 
 type Config struct {
-	Mode           string // "server" or "tencent_sfc" (not implemented yet)
-	StorageBackend string // "local" or "tencent_cos" (not implemented yet)
-	Addr           string
-	ApiKeyList     []string
+	Mode string // "server" or "function"
+
+	StorageBackend string // "local" or "s3"
+	BackendLocal   backend.LocalBackendConfig
+	BackendS3      backend.S3BackendConfig
+
+	Addr string
+
+	ApiKeyList []string
 }
 
-var CONFIG Config = Config{
-	Mode:           "server",
-	StorageBackend: "local",
-	Addr:           "0.0.0.0:8080",
-	ApiKeyList:     []string{},
-}
-
-func Init(){
-	cfg, err := LoadConfig()
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		CONFIG = *cfg
-	}
-
-	fmt.Printf("Using Config: %#v", CONFIG)
+func (cfg *Config) Print() {
+	fmt.Printf("%#v\n", *cfg)
 }
 
 func LoadConfig() (*Config, error) {
@@ -59,15 +50,4 @@ func load_config(data []byte) (*Config, error) {
 	var config Config
 	err := json.Unmarshal(data, &config)
 	return &config, err
-}
-
-func IsVaildUser(api_key string) (bool, error) {
-	hkey := crypto.Hash(api_key)
-	for _, key := range CONFIG.ApiKeyList {
-		if key == hkey {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }

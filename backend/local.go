@@ -13,6 +13,10 @@ type LocalBackend struct {
 	config LocalBackendConfig
 }
 
+func NewLocalBackend(config *LocalBackendConfig) *LocalBackend {
+	return &LocalBackend{config: *config}
+}
+
 func (b *LocalBackend) Read(path_ string) ([]byte, error) {
 	return os.ReadFile(path.Join(b.config.Root, path_))
 }
